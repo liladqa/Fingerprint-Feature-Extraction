@@ -1,5 +1,9 @@
 import streamlit as st
 from PIL import Image
+from modification import modification_bar, show_modified_image
+import numpy as np
+from ridge_detection import detect_ridges
+
 
 @st.cache
 def load_image(image_file):
@@ -46,18 +50,28 @@ Title_html = """
         </div>
         """
 st.markdown(Title_html, unsafe_allow_html=True)
+
 cont = st.container()
 with cont:
     col1, col2, col3 = st.columns([1, 3, 1])
-    image_file = col2.file_uploader("Upload your sample", type=["png", "jpg", "jpeg"])
+    image_file = col2.file_uploader("Upload your sample", type=["png", "jpg", "jpeg", "tif"])
 
-cont2 = st.container()
 
 def main():
 
     if image_file is not None:
-        col4, col5, col6, col7, col8 = cont2.columns([1, 1, 1, 1, 1])
-        col6.image(load_image(image_file), width=400)
+        original_img = Image.open(image_file)
+        image_data = np.asarray(original_img)
+
+        blur, thresholding, filters = modification_bar()
+        modified_img = show_modified_image(blur, thresholding, filters, image_data)
+
+        #a, b = detect_ridges(modified_img, sigma=0.15)
+        st.button(label='Extract Features')
+
+        cont2 = st.container()
+        col4, col5, col6 = cont2.columns(3)
+        ''''
         m = col6.markdown("""
         <style>
         div.stButton > button:first-child {
@@ -65,6 +79,19 @@ def main():
         }
         </style>""", unsafe_allow_html=True)
         col6.button(label='Extract Features')
+        '''
+
+        with col4:
+            st.markdown('Original Image')
+            st.image(original_img)
+
+        with col5:
+            st.markdown('Modified Image')
+            st.image(modified_img)
+
+        with col6:
+            st.markdown('Output Image')
+            st.image(a, b)
 
 
 if __name__ == '__main__':
