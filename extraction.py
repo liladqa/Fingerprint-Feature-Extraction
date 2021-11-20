@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image
-from modification import modification_bar, show_modified_image
+from modification import *
 import numpy as np
 from ridge_detection import detect_ridges
 
@@ -10,46 +10,11 @@ def load_image(image_file):
     img = Image.open(image_file)
     return img
 
-
-
 st.set_page_config(layout="wide")
 
-Form_button_html = """div.stButton > button:first-child {
-background-color: #00cc00;color:white;font-size:20px;height:3em;width:30em;border-radius:10px 10px 10px 10px;"""
-
-
-Title_html = """
-        <style>
-        
-            #MainMenu {visibility: hidden; }
-            footer {visibility: hidden; }
-            header {visibility: hidden;}
-            .title h1{
-              user-select: none;
-              font-size: 60px;
-              color: white;
-              text-align: center;
-              background: repeating-linear-gradient(-45deg, red 0%, yellow 7.14%, rgb(0,255,0) 14.28%, rgb(0,255,255) 21.4%, cyan 28.56%, blue 35.7%, magenta 42.84%, red 50%);
-              background-size: 600vw 600vw;
-              -webkit-text-fill-color: transparent;
-              -webkit-background-clip: text;
-              animation: slide 10s linear infinite forwards;
-            }
-            @keyframes slide {
-              0%{
-                background-position-x: 0%;
-              }
-              100%{
-                background-position-x: 600vw;
-              }
-            }
-        </style> 
-
-        <div class="title">
-            <h1>Fingerprint Feature Extraction</h1>
-        </div>
-        """
-st.markdown(Title_html, unsafe_allow_html=True)
+Title_html = open("index.html", 'r', encoding='utf-8')
+source_code = Title_html.read()
+st.markdown(source_code, unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([3, 6, 3])
 image_file = col2.file_uploader("Upload your fingerprint", type=["png", "jpg", "jpeg", "tif"])
@@ -71,6 +36,7 @@ def main():
             st.markdown('Modify Image')
             blur, tresholding, filters = modification_bar()
             st.button('Apply modifications')
+            apply_blur(blur, image_data)
 
         with col10:
             st.button("Extract features")

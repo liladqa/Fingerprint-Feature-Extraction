@@ -1,0 +1,30 @@
+<style>
+
+            #MainMenu {visibility: hidden; }
+            footer {visibility: hidden; }
+            header {visibility: hidden;}
+            .title h1{
+              font-family: Georgia;
+              user-select: none;
+              font-size: 50px;
+              color: white;
+              text-align: center;
+              background: repeating-linear-gradient(-45deg, rgb(93,252,252) 0%, cyan 7.14%, rgb(0,0,200) 14.28%, rgb(0,255,255) 21.4%, cyan 28.56%, blue 35.7%, cyan 42.84%, rgb(93,252,252) 50%);
+              background-size: 600vw 600vw;
+              -webkit-text-fill-color: transparent;
+              -webkit-background-clip: text;
+              animation: slide 8s linear infinite forwards;
+            }
+            @keyframes slide {
+              0%{
+                background-position-x: 0%;
+              }
+              100%{
+                background-position-x: 600vw;
+              }
+            }
+        </style>
+
+<div class="title">
+    <h1>Fingerprint Feature Extraction</h1>
+</div>
