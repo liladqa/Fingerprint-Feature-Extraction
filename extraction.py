@@ -51,10 +51,10 @@ Title_html = """
         """
 st.markdown(Title_html, unsafe_allow_html=True)
 
-cont = st.container()
-with cont:
-    col1, col2, col3 = st.columns([1, 3, 1])
-    image_file = col2.file_uploader("Upload your sample", type=["png", "jpg", "jpeg", "tif"])
+col1, col2, col3 = st.columns([3, 6, 3])
+image_file = col2.file_uploader("Upload your fingerprint", type=["png", "jpg", "jpeg", "tif"])
+col4, col5, col6, col7 = st.columns([3, 4.5, 1.5, 3])
+col8, col9, col10, col11, col12, col13 = st.columns([3, 1.5, 1.5, 1.5, 1.5, 3])
 
 
 def main():
@@ -63,35 +63,17 @@ def main():
         original_img = Image.open(image_file)
         image_data = np.asarray(original_img)
 
-        blur, thresholding, filters = modification_bar()
-        modified_img = show_modified_image(blur, thresholding, filters, image_data)
-
-        #a, b = detect_ridges(modified_img, sigma=0.15)
-        st.button(label='Extract Features')
-
-        cont2 = st.container()
-        col4, col5, col6 = cont2.columns(3)
-        ''''
-        m = col6.markdown("""
-        <style>
-        div.stButton > button:first-child {
-            background-color: #00cc00;color:white;font-size:20px;height:3em;width:25em;border-radius:10px 10px 10px 10px;
-        }
-        </style>""", unsafe_allow_html=True)
-        col6.button(label='Extract Features')
-        '''
-
-        with col4:
-            st.markdown('Original Image')
-            st.image(original_img)
-
         with col5:
-            st.markdown('Modified Image')
-            st.image(modified_img)
+            st.markdown('Original Image')
+            st.image(original_img, use_column_width=True)
 
         with col6:
-            st.markdown('Output Image')
-            st.image(a, b)
+            st.markdown('Modify Image')
+            blur, tresholding, filters = modification_bar()
+            st.button('Apply modifications')
+
+        with col10:
+            st.button("Extract features")
 
 
 if __name__ == '__main__':

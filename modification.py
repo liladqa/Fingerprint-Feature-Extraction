@@ -15,16 +15,10 @@ horizontal_prewitt_filter = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
 
 
 def modification_bar():
-    col1, col2, col3 = st.columns(3)
 
-    with col1:
-        blur = st.radio('Apply Blur', ('No blur', 'Gaussian blur', 'Median blur'))
-
-    with col2:
-        thresholding = st.radio('Apply Thresholding', ('No thresholding', 'Mean thresholding', 'Adaptive thresholding'))
-
-    with col3:
-        filters = st.radio('Apply Filter', ('No filter', 'Robert filter', 'Sobel filter', 'Prewitt filter'))
+    blur = st.radio('Apply Blur', ('No blur', 'Gaussian blur', 'Median blur'))
+    thresholding = st.radio('Apply Thresholding', ('No thresholding', 'Mean thresholding', 'Adaptive thresholding'))
+    filters = st.radio('Apply Filter', ('No filter', 'Robert filter', 'Sobel filter', 'Prewitt filter'))
 
     return blur, thresholding, filters
 
@@ -74,6 +68,6 @@ def show_modified_image(blur, thresholding, filters, img):
         img = apply_thresholding(thresholding, img)
         img = apply_filter(filters, img)
 
-        return img
+    return img
 
 
