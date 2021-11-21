@@ -26,9 +26,9 @@ def modification_bar():
 def apply_blur(blur, img):
 
     if blur == 'Gaussian blur':
-        return cv2.GaussianBlur(img, (1, 1), 0)
+        return cv2.GaussianBlur(img, (5, 5), 0)
     elif blur == 'Median blur':
-        return cv2.medianBlur(img, 1)
+        return cv2.medianBlur(img, 5)
     else:
         return img
 
@@ -39,7 +39,7 @@ def apply_thresholding(thresholding, img):
         th = img.mean()
         return np.array(img > th).astype(int) * 255
     elif thresholding == 'Adaptive thresholding':
-        return cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        return cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     else:
         return img
 
@@ -48,13 +48,13 @@ def apply_filter(filters, img):
 
     img = Image.fromarray(img)
 
-    if filters == 'Mean thresholding':
+    if filters == 'Robert filter':
         img = convolve(img, vertical_robert_filter)
         img = convolve(img, horizontal_robert_filter)
-    elif filters == 'Adaptive thresholding':
+    elif filters == 'Sobel filter':
         img = convolve(img, vertical_sobel_filter)
         img = convolve(img, horizontal_sobel_filter)
-    elif filters == '':
+    elif filters == 'Prewitt filter':
         img = convolve(img, vertical_prewitt_filter)
         img = convolve(img, horizontal_prewitt_filter)
 
@@ -62,11 +62,10 @@ def apply_filter(filters, img):
     
 
 def show_modified_image(blur, thresholding, filters, img):
-    
-    if st.button("Modify picture"):
-        img = apply_blur(blur, img)
-        img = apply_thresholding(thresholding, img)
-        img = apply_filter(filters, img)
+
+    img = apply_blur(blur, img)
+    img = apply_thresholding(thresholding, img)
+    img = apply_filter(filters, img)
 
     return img
 
