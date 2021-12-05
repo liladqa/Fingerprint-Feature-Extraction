@@ -1,59 +1,119 @@
-import imageio
-import streamlit as st
-from PIL import Image
-from skimage.color import rgb2gray
-
-from modification import *
+from skimage.morphology import convex_hull_image, erosion, square
 import numpy as np
-from ridge_detection import detect_ridges
+import math
+import skimage
+import matplotlib.pyplot as plt
 
 
-@st.cache
-def load_image(image_file):
-    img = imageio.imread(image_file)
-    return img
+def getTerminationBifurcation(img, mask):
+    img = img == 255;
+    (rows, cols) = img.shape;
+    minutiaeTerm = np.zeros(img.shape);
+    minutiaeBif = np.zeros(img.shape);
 
-st.set_page_config(layout="wide")
+    for i in range(1, rows - 1):
+        for j in range(1, cols - 1):
+            if (img[i][j] == 1):
+                block = img[i - 1:i + 2, j - 1:j + 2];
+                block_val = np.sum(block);
+                if (block_val == 2):
+                    minutiaeTerm[i, j] = 1;
+                elif (block_val == 4):
+                    minutiaeBif[i, j] = 1;
 
-Title_html = open("index.html", 'r', encoding='utf-8')
-source_code = Title_html.read()
-st.markdown(source_code, unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns([3, 6, 3])
-image_file = col2.file_uploader("Upload your fingerprint", type=["png", "jpg", "jpeg", "tif", "bmp"])
-col4, col5, col6, col7 = st.columns([3, 4.5, 1.5, 3])
-col8, col9, col10, col11, col12, col13 = st.columns([3, 1.5, 1.5, 1.5, 1.5, 3])
-
-
-def main():
-
-    if image_file is not None:
-        original_img = Image.open(image_file)
-        image_data = np.asarray(original_img)
-        modified_img = image_data;
-
-        with col5:
-            st.markdown('Original Image')
-            st.image(original_img, use_column_width=True)
-
-        with col6:
-            st.markdown('Modify Image')
-            blur, tresholding, filters = modification_bar()
-            if st.button('Apply modifications'):
-                modified_img = show_modified_image(blur, tresholding, filters, image_data)
-                # podlad, mozna pozniej wywalic
-                st.image(modified_img)
-
-        with col10:
-            if st.button("Extract features"):
-                modified_img = rgb2gray(modified_img)
-                a, b = detect_ridges(modified_img, sigma=0.15)
-                a = Image.fromarray(a).convert('RGB')
-                b = Image.fromarray(b).convert('RGB')
-                # podglad, mozna pozniej wywalic
-                st.image(a)
-                st.image(b)
+    mask = convex_hull_image(mask > 0)
+    mask = erosion(mask, square(5))
+    minutiaeTerm = np.uint8(mask) * minutiaeTerm
+    return (minutiaeTerm, minutiaeBif)
 
 
-if __name__ == '__main__':
-    main()
+class MinutiaeFeature(object):
+    def __init__(self, locX, locY, Orientation, Type):
+        self.locX = locX;
+        self.locY = locY;
+        self.Orientation = Orientation;
+        self.Type = Type;
+
+
+def computeAngle(block, minutiaeType):
+    angle = 0
+    (blkRows, blkCols) = np.shape(block);
+    CenterX, CenterY = (blkRows - 1) / 2, (blkCols - 1) / 2
+    if (minutiaeType.lower() == 'termination'):
+        sumVal = 0;
+        for i in range(blkRows):
+            for j in range(blkCols):
+                if ((i == 0 or i == blkRows - 1 or j == 0 or j == blkCols - 1) and block[i][j] != 0):
+                    angle = -math.degrees(math.atan2(i - CenterY, j - CenterX))
+                    sumVal += 1
+                    if (sumVal > 1):
+                        angle = float('nan');
+        return (angle)
+    elif (minutiaeType.lower() == 'bifurcation'):
+        (blkRows, blkCols) = np.shape(block);
+        CenterX, CenterY = (blkRows - 1) / 2, (blkCols - 1) / 2
+        angle = []
+        sumVal = 0;
+        for i in range(blkRows):
+            for j in range(blkCols):
+                if ((i == 0 or i == blkRows - 1 or j == 0 or j == blkCols - 1) and block[i][j] != 0):
+                    angle.append(-math.degrees(math.atan2(i - CenterY, j - CenterX)))
+                    sumVal += 1
+        if (sumVal != 3):
+            angle = float('nan')
+        return (angle)
+
+
+def extractMinutiaeFeatures(skel, minutiaeTerm, minutiaeBif):
+    FeaturesTerm = []
+
+    minutiaeTerm = skimage.measure.label(minutiaeTerm, connectivity=2);
+    RP = skimage.measure.regionprops(minutiaeTerm)
+
+    WindowSize = 2
+    FeaturesTerm = []
+    for i in RP:
+        (row, col) = np.int16(np.round(i['Centroid']))
+        block = skel[row - WindowSize:row + WindowSize + 1, col - WindowSize:col + WindowSize + 1]
+        angle = computeAngle(block, 'Termination')
+        FeaturesTerm.append(MinutiaeFeature(row, col, angle, 'Termination'))
+
+    FeaturesBif = []
+    minutiaeBif = skimage.measure.label(minutiaeBif, connectivity=2);
+    RP = skimage.measure.regionprops(minutiaeBif)
+    WindowSize = 1
+    for i in RP:
+        (row, col) = np.int16(np.round(i['Centroid']))
+        block = skel[row - WindowSize:row + WindowSize + 1, col - WindowSize:col + WindowSize + 1]
+        angle = computeAngle(block, 'Bifurcation')
+        FeaturesBif.append(MinutiaeFeature(row, col, angle, 'Bifurcation'))
+    return (FeaturesTerm, FeaturesBif)
+
+
+def ShowResults(skel, TermLabel, BifLabel):
+    minutiaeBif = TermLabel * 0;
+    minutiaeTerm = BifLabel * 0;
+
+    (rows, cols) = skel.shape
+    DispImg = np.zeros((rows, cols, 3), np.uint8)
+    DispImg[:, :, 0] = skel;
+    DispImg[:, :, 1] = skel;
+    DispImg[:, :, 2] = skel;
+
+    RP = skimage.measure.regionprops(BifLabel)
+    for idx, i in enumerate(RP):
+        (row, col) = np.int16(np.round(i['Centroid']))
+        minutiaeBif[row, col] = 1;
+        (rr, cc) = skimage.draw.circle_perimeter(row, col, 1);
+        skimage.draw.set_color(DispImg, (rr, cc), (255, 0, 0));
+
+    RP = skimage.measure.regionprops(TermLabel)
+    for idx, i in enumerate(RP):
+        (row, col) = np.int16(np.round(i['Centroid']))
+        minutiaeTerm[row, col] = 1;
+        (rr, cc) = skimage.draw.circle_perimeter(row, col, 1);
+        skimage.draw.set_color(DispImg, (rr, cc), (0, 0, 255));
+
+    plt.figure(figsize=(6, 6))
+    plt.title("Minutiae extraction results")
+    return DispImg
