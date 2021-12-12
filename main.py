@@ -68,8 +68,13 @@ def main():
                 # podlad, mozna pozniej wywalic
                 st.image(modified_img)
 
-                #modified_img = rgb2gray(modified_img)
                 img = np.array(modified_img).astype(int)
+
+                for i, v1 in enumerate(img):
+                    for j, v2 in enumerate(v1):
+                        if v2 == 255:
+                            img[i, j] = 1
+
                 skel = skimage.morphology.skeletonize(img)
                 skel = np.uint8(skel) * 255
                 mask = img * 255
