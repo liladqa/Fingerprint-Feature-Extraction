@@ -74,6 +74,14 @@ def main():
                 placeholder.image(extracted, use_column_width=True, output_format="auto")
 
                 col15.success('Fingerprint feature vector = ' + str(determine_vector(FeaturesTerm, FeaturesBif)))
+                col15.success('1. sum of x variables of all terminations \n'
+                              '2. sum of y variables of all terminations \n'
+                              '3. sum of x variables of all bifurcations \n'
+                              '4. sum of y variables of all bifurcations \n'
+                              '5. Ratio 1./2. \n'
+                              '6. Ratio 3./4. \n'
+                              '7. Ratio 1./3. \n'
+                              '8. Ratio 2./4. \n')
 
 
 if __name__ == '__main__':
