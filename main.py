@@ -33,20 +33,16 @@ def main():
         image_data = np.asarray(original_img)
         modified_img = image_data
 
-        with col6:
+        with col6.form(key="image_display", clear_on_submit=False):
             blur, tresholding, filters = modification_bar()
+            apply = st.form_submit_button("Apply changes")
 
         with col10:
-            st.markdown('Modify Image')
-
             if st.button('Extract'):
 
                 modified_img = show_modified_image(blur, tresholding, filters, image_data)
 
-
                 a, b = detect_ridges(modified_img, sigma=0.9)
-                # podglad, mozna pozniej wywalic
-
                 def plot_images(*images):
                     images = list(images)
                     n = len(images)
@@ -58,8 +54,6 @@ def main():
                     return fig
 
                 st.pyplot(plot_images(a, b))
-
-                # podlad, mozna pozniej wywalic
                 st.image(modified_img)
 
                 img = np.array(modified_img).astype(int)
