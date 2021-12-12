@@ -12,11 +12,6 @@ import numpy as np
 from ridge_detection import detect_ridges
 
 
-@st.cache
-def load_image():
-    img = imageio.imread(image_file)
-    return img
-
 st.set_page_config(layout="wide")
 
 Title_html = open("index.html", 'r', encoding='utf-8')
@@ -28,17 +23,15 @@ image_file = col2.file_uploader("Upload your fingerprint", type=["png", "jpg", "
 col4, col5, col6, col7 = st.columns([3, 4.5, 1.5, 3])
 col8, col9, col10, col11, col12, col13 = st.columns([3, 1.5, 1.5, 1.5, 1.5, 3])
 
+placeholder = col5.empty()
 
 def main():
 
     if image_file is not None:
         original_img = Image.open(image_file)
+        placeholder.image(original_img, use_column_width=True, output_format="auto")
         image_data = np.asarray(original_img)
         modified_img = image_data
-
-        with col5:
-            st.markdown('Original Image')
-            st.image(original_img, use_column_width=True)
 
         with col6:
             blur, tresholding, filters = modification_bar()
