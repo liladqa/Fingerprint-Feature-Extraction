@@ -5,6 +5,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from skimage.color import rgb2gray
 from extraction import getTerminationBifurcation, extractMinutiaeFeatures, ShowResults
+from vector import *
 
 from modification import *
 import numpy as np
@@ -72,8 +73,10 @@ def main():
 
                 for i, v1 in enumerate(img):
                     for j, v2 in enumerate(v1):
-                        if v2 == 255:
+                        if v2 >= 125:
                             img[i, j] = 1
+                        else:
+                            img[i, j] = 0
 
                 skel = skimage.morphology.skeletonize(img)
                 skel = np.uint8(skel) * 255
@@ -85,6 +88,8 @@ def main():
                 TermLabel = skimage.measure.label(minutiaeTerm, connectivity=1)
                 results = ShowResults(skel, TermLabel, BifLabel)
                 st.image(Image.fromarray(results).convert('RGB'))
+
+                st.markdown('vector = ' + str(determine_vector(FeaturesTerm, FeaturesBif)))
 
 
 if __name__ == '__main__':

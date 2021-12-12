@@ -17,7 +17,7 @@ horizontal_prewitt_filter = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
 def modification_bar():
 
     blur = st.radio('Apply Blur', ('No blur', 'Gaussian blur', 'Median blur'))
-    thresholding = st.radio('Apply Thresholding', ('No thresholding', 'Mean thresholding', 'Adaptive thresholding'))
+    thresholding = st.radio('Apply Thresholding', ('No thresholding', 'Adaptive thresholding'))
     filters = st.radio('Apply Filter', ('No filter', 'Robert filter', 'Sobel filter', 'Prewitt filter'))
 
     return blur, thresholding, filters
@@ -35,10 +35,7 @@ def apply_blur(blur, img):
 
 def apply_thresholding(thresholding, img):
 
-    if thresholding == 'Mean thresholding':
-        th = img.mean()
-        return np.array(img > th).astype(int) * 255
-    elif thresholding == 'Adaptive thresholding':
+    if thresholding == 'Adaptive thresholding':
         return cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     else:
         return img
