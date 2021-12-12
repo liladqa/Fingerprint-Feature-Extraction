@@ -1,9 +1,5 @@
-import imageio
 import skimage
-import streamlit as st
-from PIL import Image
 from matplotlib import pyplot as plt
-from skimage.color import rgb2gray
 from extraction import getTerminationBifurcation, extractMinutiaeFeatures, ShowResults
 from vector import *
 

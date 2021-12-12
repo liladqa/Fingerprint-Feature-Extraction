@@ -1,6 +1,4 @@
-from matplotlib import pyplot as plt
 from skimage.feature import hessian_matrix, hessian_matrix_eigvals
-import cv2
 
 
 def detect_ridges(gray, sigma):
