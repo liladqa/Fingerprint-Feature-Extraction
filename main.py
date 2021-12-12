@@ -53,7 +53,7 @@ def main():
 
 
         with col10:
-            if st.button('Extract features'):
+            if st.button('Extract fingerprint features'):
                 a, b = detect_ridges(modified_img, sigma=0.9)
 
                 img = np.array(modified_img).astype(int)
